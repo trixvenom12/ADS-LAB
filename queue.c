@@ -1,75 +1,77 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int *queue;
-int N;
+#define SIZE 5
+
+int queue[SIZE];
 int front = -1;
 int rear = -1;
 
 void enqueue() {
-    int ele;
-    printf("Enter the element to be enqueued: ");
-    scanf("%d", &ele);
-
-    if ((rear + 1) % N == front) {
-        printf("Overflow! Queue is full.\n");
-    } else if (front == -1 && rear == -1) {
-        front = rear = 0;
-        queue[rear] = ele;
-        printf("Inserted %d successfully.\n", ele);
-    } else {
-        rear = (rear + 1) % N;
-        queue[rear] = ele;
-        printf("Inserted %d successfully.\n", ele);
+    int element;
+    if ((front == 0 && rear == SIZE - 1) || (rear == (front - 1) % (SIZE - 1))) {
+        printf("Queue is Full (Overflow)!\n");
+        return;
     }
+
+    printf("Enter element: ");
+    scanf("%d", &element);
+
+    if (front == -1) { 
+        front = rear = 0;
+        queue[rear] = element;
+    } else if (rear == SIZE - 1 && front != 0) {
+        rear = 0; 
+        queue[rear] = element;
+    } else {
+        rear++;
+        queue[rear] = element;
+    }
+    printf("Inserted %d successfully.\n", element);
 }
 
 void dequeue() {
-    if (front == -1 && rear == -1) {
-        printf("Underflow! Queue is empty.\n");
-    } else if (front == rear) {
-        printf("Dequeued element: %d\n", queue[front]);
+    if (front == -1) {
+        printf("Queue is Empty (Underflow)!\n");
+        return;
+    }
+
+    printf("Deleted element: %d\n", queue[front]);
+
+    if (front == rear) { 
         front = -1;
         rear = -1;
+    } else if (front == SIZE - 1) {
+        front = 0;
     } else {
-        printf("Dequeued element: %d\n", queue[front]);
-        front = (front + 1) % N;
+        front++;
     }
 }
 
 void display() {
-    if (front == -1 && rear == -1) {
-        printf("Queue is empty.\n");
-    } else {
-        printf("Queue elements are: ");
-        int i = front;
-        while (1) {
-            printf("%d ", queue[i]);
-            if (i == rear)
-                break;
-            i = (i + 1) % N;
-        }
-        printf("\n");
+    if (front == -1) {
+        printf("Queue is Empty.\n");
+        return;
     }
+
+    printf("Circular Queue: ");
+    if (rear >= front) {
+        for (int i = front; i <= rear; i++) {
+            printf("%d ", queue[i]);
+        }
+    } else {
+        for (int i = front; i < SIZE; i++) {
+            printf("%d ", queue[i]);
+        }
+        for (int i = 0; i <= rear; i++) {
+            printf("%d ", queue[i]);
+        }
+    }
+    printf("\n");
 }
 
 int main() {
     int choice;
-    
-    printf("Enter the size of the circular queue: ");
-    scanf("%d", &N);
-
-    // Prevent division/modulo by zero and invalid allocations
-    if (N <= 0) {
-        printf("Invalid size! Size must be greater than 0.\n");
-        return 1;
-    }
-
-    queue = (int *)malloc(N * sizeof(int));
-    if (queue == NULL) {
-        printf("Memory allocation failed!\n");
-        return 1;
-    }
 
     while (1) {
         printf("\n--- Circular Queue Menu ---\n");
@@ -91,13 +93,12 @@ int main() {
                 display();
                 break;
             case 4:
-                free(queue);
                 printf("Exiting program...\n");
                 exit(0);
             default:
                 printf("Invalid choice! Please enter a number between 1 and 4.\n");
         }
     }
-    
+
     return 0;
 }
